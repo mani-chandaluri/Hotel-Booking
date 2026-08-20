@@ -2,7 +2,9 @@ import User from "../models/User.js";
 import { Webhook } from "svix";
 
 const clerkWebhooks = async (req, res) => {
+
     try {
+
         // Create Svix webhook instance
         const whook = new Webhook(
             process.env.CLERK_WEBHOOK_SECRET
@@ -15,8 +17,11 @@ const clerkWebhooks = async (req, res) => {
             "svix-signature": req.headers["svix-signature"]
         };
 
-        // Verify webhook using RAW body
-        const evt = whook.verify(req.body, headers);
+        // Verify webhook
+        const evt = await whook.verify(
+            req.body,
+            headers
+        );
 
         // Get data and event type
         const { data, type } = evt;
@@ -25,33 +30,58 @@ const clerkWebhooks = async (req, res) => {
         const userData = {
             _id: data.id,
             email: data.email_addresses[0].email_address,
-            username: data.first_name + " " + data.last_name,
+            username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
             image: data.image_url
         };
 
-        // Handle different Clerk events
+        // Handle events
         switch (type) {
 
             case "user.created":
+
                 await User.create(userData);
-                console.log("User created:", data.id);
+
+                console.log(
+                    "User created:",
+                    data.id
+                );
+
                 break;
 
             case "user.updated":
+
                 await User.findByIdAndUpdate(
                     data.id,
                     userData
                 );
-                console.log("User updated:", data.id);
+
+                console.log(
+                    "User updated:",
+                    data.id
+                );
+
                 break;
 
             case "user.deleted":
-                await User.findByIdAndDelete(data.id);
-                console.log("User deleted:", data.id);
+
+                await User.findByIdAndDelete(
+                    data.id
+                );
+
+                console.log(
+                    "User deleted:",
+                    data.id
+                );
+
                 break;
 
             default:
-                console.log("Unhandled event:", type);
+
+                console.log(
+                    "Unhandled event:",
+                    type
+                );
+
                 break;
         }
 
@@ -62,7 +92,10 @@ const clerkWebhooks = async (req, res) => {
 
     } catch (error) {
 
-        console.log("WEBHOOK ERROR:", error.message);
+        console.log(
+            "WEBHOOK ERROR:",
+            error.message
+        );
 
         res.status(400).json({
             success: false,
