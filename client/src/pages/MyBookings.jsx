@@ -4,8 +4,8 @@ import { assets} from '../assets/assets'
 import { useAppContext } from '../context/AppContext'
 import toast from 'react-hot-toast'
 const MyBookings = () => {
-    const {axios,getToken,user}=useAppContext()
-    const [bookings,setBookings]=useState([])
+   const {axios,getToken,user}=useAppContext()
+   const [bookings,setBookings]=useState([])
 const fetchUserBookings = async () => {
     try {
       const { data } = await axios.get('/api/bookings/user', { headers: {

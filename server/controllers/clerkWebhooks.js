@@ -27,41 +27,41 @@ const clerkWebhooks = async (req, res) => {
         const { data, type } = evt;
 
         // Prepare user data
-        const userData = {
+     
+
+        // Handle events
+        switch (type) {
+
+            case "user.created":{
+            const userData = {
             _id: data.id,
             email: data.email_addresses[0].email_address,
             username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
             image: data.image_url
         };
 
-        // Handle events
-        switch (type) {
-
-            case "user.created":
-
                 await User.create(userData);
 
-                console.log(
-                    "User created:",
-                    data.id
-                );
+                
 
                 break;
-
-            case "user.updated":
-
+    }
+            case "user.updated":{
+                   const userData = {
+                       _id: data.id,
+                        email: data.email_addresses[0].email_address,
+                        username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+                       image: data.image_url
+                  };
                 await User.findByIdAndUpdate(
                     data.id,
                     userData
                 );
 
-                console.log(
-                    "User updated:",
-                    data.id
-                );
+               
 
                 break;
-
+            }
             case "user.deleted":
 
                 await User.findByIdAndDelete(
